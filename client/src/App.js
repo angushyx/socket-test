@@ -1,31 +1,26 @@
 import React from 'react'
-import { Button } from 'react-bootstrap';
-import Alert from "react-bootstrap/Alert";
+import io from 'socket.io-client'
+import Form from 'react-bootstrap/Form'
+import Button from 'react-bootstrap/Button'
+
+const socket = io.connect('http://localhost:8080')
 
 const App = () => {
+  const sendMessage = () => {
+    socket.emit()
+  }
+
   return (
-    <>
-      <>
-        {[
-          "primary",
-          "secondary",
-          "success",
-          "danger",
-          "warning",
-          "info",
-          "light",
-          "dark",
-        ].map((variant) => (
-          <Alert key={variant} variant={variant}>
-            This is a {variant} alert—check it out!
-          </Alert>
-        ))}
-      </>
-      <div></div>
-      <Button>123</Button>
-      <div className="btn btn-info">App</div>
-    </>
-  );
+    <div className="container">
+      <Form>
+        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+          <Form.Label>Email address</Form.Label>
+          <Form.Control type="email" placeholder="Message" />
+        </Form.Group>
+        <Button onClick={sendMessage}>SEND MESSAGE</Button>
+      </Form>
+    </div>
+  )
 }
 
 export default App

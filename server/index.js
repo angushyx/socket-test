@@ -15,4 +15,8 @@ const io = new Server(server, {
   },
 });
 
+io.on('connection',(socket)=>{
+  console.log(`User Connected:${socket.id}`)
+})
+
 server.listen(PORT, console.log(`Server has successfully Start at: ${PORT}`));
