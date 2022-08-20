@@ -1,22 +1,31 @@
 import React, { useRef } from 'react'
 import { Container, Form, Button } from 'react-bootstrap'
+import { v4 as uuidV4 } from 'uuid'
 
-const Login = () => {
+const Login = ({ onIdSubmit }) => {
+  const idRef = useRef()
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onIdSubmit(idRef.current.value)
+  }
+  const createNewId = () => {
+    onIdSubmit(uuidV4())
+  }
+
   return (
     <Container>
-      <Form>
+      <Form onSubmit={handleSubmit}>
         <Form.Group className="my-3" controlId="exampleForm.ControlInput1">
-          <Form.Control type="text" placeholder="Choose Room" />
+          <Form.Label>Enter your id</Form.Label>
+          <Form.Control type="text" ref={idRef} required />
         </Form.Group>
-        <Button>Join Room</Button>
-      </Form>
-      <Form>
-        <Form.Group className="my-4" controlId="exampleForm.ControlInput1">
-          <Form.Control type="text" placeholder="Message" />
-        </Form.Group>
-        <Button>SEND MESSAGE</Button>
-        <h1>Message:</h1>
-        <p></p>
+        <div className="d-flex gap-4">
+          <Button>Login</Button>
+          <Button onClick={createNewId} variant="dark">
+            Create New Id
+          </Button>
+        </div>
       </Form>
     </Container>
   )
