@@ -1,11 +1,8 @@
 const express = require('express')
-const path = require('path')
 const http = require('http')
 const app = express()
 const { Server } = require('socket.io')
 var cors = require('cors')
-
-app.use(express.static(path.join(__dirname, 'public')))
 app.use(cors())
 
 const PORT = process.env.PORT || 8080
