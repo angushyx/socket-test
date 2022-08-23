@@ -8,7 +8,7 @@ export function useConversations() {
   return useContext(ConversationsContext)
 }
 
-export function ConversationsProvider({ children }) {
+export function ConversationsProvider({ id, children }) {
   const [conversations, setConversations] = useLocalStorage('conversations', [])
   const [selectedConversationIndex, setSelectedConversationIndex] = useState(0)
 
@@ -20,32 +20,84 @@ export function ConversationsProvider({ children }) {
     })
   }
 
-  /**
-   * 無法賦予值
-   */
+  const addMessageToConversation = ({ recipients, text, sender }) => {
+    setConversations((prevConversations) => {
+      let madeChange = false
+      const newMessage = { sender, text }
+      const newConvarsation = prevConversations.map((conversation) => {
+        console.log('prev', prevConversations)
+        if (arrayEquality(conversation.recipients, recipients)) {
+          madeChange = true
+          //如何讓這個空的 array 可以擴充，一直加入新的 obj???
+          console.log('message', conversation.messages)
+          return {
+            ...conversation,
+            // 空的 array佔位子
+            messages: [conversation.messages, newMessage],
+          }
+        }
+        console.log(conversation)
+        return conversation
+      })
+
+      if (madeChange) {
+        return newConvarsation
+      } else {
+        return [...prevConversations, { recipients, messages: [newMessage] }]
+      }
+    })
+  }
+
+  const sendMessage = (recipients, text) => {
+    addMessageToConversation({ recipients, text, sender: id })
+  }
+
   const formattedConversations = conversations.map((conversation, index) => {
     const recipients = conversation.recipients.map((recipient) => {
       const contact = contacts.find((contact) => {
         return contact.id === recipient
       })
+
       const name = (contact && contact.name) || recipient
+
       return { id: recipient, name }
     })
 
+    const messages = conversation.messages.map((message) => {
+      const contact = contacts.find((contact) => {
+        return contact.id === message.sender
+      })
+      const name = (contact && contact.name) || message.sender
+
+      const fromMe = id === message.sender
+      return { ...message, senderName: name, fromMe }
+    })
+
     const selected = index === selectedConversationIndex
-    return { ...conversation, recipients }
+    return { ...conversation, messages, recipients, selected }
   })
 
   const value = {
     conversations: formattedConversations,
-    selectedConversationIndex,
+    selectedConversation: formattedConversations[selectedConversationIndex],
+    sendMessage,
+    selectConversationIndex: setSelectedConversationIndex,
     createConversation,
   }
-  console.log('out side', formattedConversations)
 
   return (
     <ConversationsContext.Provider value={value}>
       {children}
     </ConversationsContext.Provider>
   )
+}
+
+function arrayEquality(a, b) {
+  if (a.length !== b.length) return false
+  a.sort()
+  b.sort()
+
+  return a.every((element, index) => {
+    return element === b[index]
+  })
 }
