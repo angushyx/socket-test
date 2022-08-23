@@ -2,6 +2,7 @@ const express = require('express')
 const path = require('path')
 const http = require('http')
 const app = express()
+// const pool = require('./db')
 const { Server } = require('socket.io')
 var cors = require('cors')
 
@@ -17,6 +18,16 @@ const io = new Server(server, {
     method: ['GET', 'POST'],
   },
 })
+
+/**
+ * 拿取db資料
+ * 0822 work
+ */
+// app.get('/api/v1.0/handmade', async (req, res) => {
+//   let [data] = await pool.execute('SELECT * FROM handmade.users')
+//   console.log(data)
+//   res.json(data)
+// })
 
 io.on('connection', (socket) => {
   //測試有沒有連線成功

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage'
 import { useContacts } from './ContactsProvider'
 
@@ -10,6 +10,7 @@ export function useConversations() {
 
 export function ConversationsProvider({ children }) {
   const [conversations, setConversations] = useLocalStorage('conversations', [])
+  const [selectedConversationIndex, setSelectedConversationIndex] = useState(0)
 
   const { contacts } = useContacts()
 
@@ -19,7 +20,10 @@ export function ConversationsProvider({ children }) {
     })
   }
 
-  const formattedConversations = conversations.map((conversation) => {
+  /**
+   * 無法賦予值
+   */
+  const formattedConversations = conversations.map((conversation, index) => {
     const recipients = conversation.recipients.map((recipient) => {
       const contact = contacts.find((contact) => {
         return contact.id === recipient
@@ -28,13 +32,16 @@ export function ConversationsProvider({ children }) {
       return { id: recipient, name }
     })
 
+    const selected = index === selectedConversationIndex
     return { ...conversation, recipients }
   })
 
   const value = {
     conversations: formattedConversations,
+    selectedConversationIndex,
     createConversation,
   }
+  console.log('out side', formattedConversations)
 
   return (
     <ConversationsContext.Provider value={value}>
