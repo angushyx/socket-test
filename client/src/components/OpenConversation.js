@@ -1,9 +1,16 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { Button, Form, InputGroup } from 'react-bootstrap'
 import { useConversations } from '../contexts/ConversationsProvider'
 
 export default function OpenConversation() {
   const [text, setText] = useState()
+
+  const setRef = useCallback((node) => {
+    if (node) {
+      node.scrollIntoView({ smooth: true })
+    }
+  })
+
   const { sendMessage, selectedConversation } = useConversations()
 
   const handleSubmit = (e) => {
@@ -15,30 +22,36 @@ export default function OpenConversation() {
     )
 
     setText('')
-
-    console.log('message', selectedConversation.messages)
-    console.log('selectedConversation', selectedConversation)
   }
 
   return (
     <>
       <div className="d-flex flex-column flex-grow-1">
         <div className="flex-grow-1 overflow-auto">
-          <div className="h-100 d-felx flex-column align-items-center justify-content-end px-3">
+          <div className="h-100 d-felx flex-column align-items-start justify-content-end px-3">
             {selectedConversation.messages.map((message, index) => {
+              console.log(message.fromMe)
+              const lastMessage =
+                selectedConversation.messages.length - 1 === index
               return (
-                <div key={index} className="my-1 d-flex flex-column">
+                <div
+                  key={index}
+                  ref={lastMessage ? setRef : null}
+                  className={`my-1 d-flex flex-column 
+                  ${message.fromMe ? '' : ''}`}
+                >
                   <div
                     className={`rounded px-2 py-1 ${
-                      message ? 'bg-primary text-white' : 'border'
+                      message.fromMe
+                        ? 'bg-primary text-white align-self-end'
+                        : 'border'
                     }`}
                   >
                     {message.text}
                   </div>
                   <div
-                    className={`text-muted small ${
-                      message.fromMe ? 'text-right' : ''
-                    }`}
+                    className={`text-muted small
+                    ${message.fromMe ? 'text-end' : ''}`}
                   >
                     {message.fromMe ? 'You' : message.sender}
                   </div>

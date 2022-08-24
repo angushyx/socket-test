@@ -25,20 +25,20 @@ export function ConversationsProvider({ id, children }) {
       let madeChange = false
       const newMessage = { sender, text }
       const newConvarsation = prevConversations.map((conversation) => {
-        console.log('prev', prevConversations)
         if (arrayEquality(conversation.recipients, recipients)) {
           madeChange = true
           //如何讓這個空的 array 可以擴充，一直加入新的 obj???
-          console.log('message', conversation.messages)
+
+          console.log('conversatnio', conversation)
           return {
             ...conversation,
             // 空的 array佔位子
-            messages: [conversation.messages, newMessage],
+            messages: [...conversation.messages, newMessage],
           }
         }
-        console.log(conversation)
         return conversation
       })
+      console.log('newConvarsation', newConvarsation)
 
       if (madeChange) {
         return newConvarsation
