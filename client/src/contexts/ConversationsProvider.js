@@ -1,6 +1,7 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState, useCallback } from 'react'
 import useLocalStorage from '../hooks/useLocalStorage'
 import { useContacts } from './ContactsProvider'
+import { useSocket } from './SocketProvider'
 
 const ConversationsContext = React.createContext()
 
@@ -13,6 +14,7 @@ export function ConversationsProvider({ id, children }) {
   const [selectedConversationIndex, setSelectedConversationIndex] = useState(0)
 
   const { contacts } = useContacts()
+  const socket = useSocket()
 
   const createConversation = (recipients) => {
     setConversations((prevConversations) => {
@@ -20,35 +22,46 @@ export function ConversationsProvider({ id, children }) {
     })
   }
 
-  const addMessageToConversation = ({ recipients, text, sender }) => {
-    setConversations((prevConversations) => {
-      let madeChange = false
-      const newMessage = { sender, text }
-      const newConvarsation = prevConversations.map((conversation) => {
-        if (arrayEquality(conversation.recipients, recipients)) {
-          madeChange = true
-          //如何讓這個空的 array 可以擴充，一直加入新的 obj???
+  const addMessageToConversation = useCallback(
+    ({ recipients, text, sender }) => {
+      setConversations((prevConversations) => {
+        let madeChange = false
+        const newMessage = { sender, text }
+        const newConvarsation = prevConversations.map((conversation) => {
+          if (arrayEquality(conversation.recipients, recipients)) {
+            madeChange = true
+            //如何讓這個空的 array 可以擴充，一直加入新的 obj???
 
-          console.log('conversatnio', conversation)
-          return {
-            ...conversation,
-            // 空的 array佔位子
-            messages: [...conversation.messages, newMessage],
+            console.log('conversatnio', conversation)
+            return {
+              ...conversation,
+              // 空的 array佔位子
+              messages: [...conversation.messages, newMessage],
+            }
           }
-        }
-        return conversation
-      })
-      console.log('newConvarsation', newConvarsation)
+          return conversation
+        })
+        console.log('newConvarsation', newConvarsation)
 
-      if (madeChange) {
-        return newConvarsation
-      } else {
-        return [...prevConversations, { recipients, messages: [newMessage] }]
-      }
-    })
-  }
+        if (madeChange) {
+          return newConvarsation
+        } else {
+          return [...prevConversations, { recipients, messages: [newMessage] }]
+        }
+      })
+    },
+    [setConversations]
+  )
+
+  useEffect(() => {
+    if (socket == null) return
+    socket.on('receive-message', addMessageToConversation)
+
+    return () => socket.off('receive-message')
+  }, [socket, addMessageToConversation])
 
   const sendMessage = (recipients, text) => {
+    socket.emit('send-message', { recipients, text })
     addMessageToConversation({ recipients, text, sender: id })
   }
 

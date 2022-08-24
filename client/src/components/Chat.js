@@ -4,15 +4,19 @@ import useLocalStorage from '../hooks/useLocalStorage'
 import Dashboard from './Dashboard'
 import { ContactProvider } from '../contexts/ContactsProvider'
 import { ConversationsProvider } from '../contexts/ConversationsProvider'
+import { SocketProvider } from '../contexts/SocketProvider'
+
 const Chat = () => {
   const [id, setId] = useLocalStorage('id')
 
   const dashboard = (
-    <ContactProvider>
-      <ConversationsProvider id={id}>
-        <Dashboard id={id} />
-      </ConversationsProvider>
-    </ContactProvider>
+    <SocketProvider id={id}>
+      <ContactProvider>
+        <ConversationsProvider id={id}>
+          <Dashboard id={id} />
+        </ConversationsProvider>
+      </ContactProvider>
+    </SocketProvider>
   )
 
   return id ? dashboard : <Login onIdSubmit={setId} />

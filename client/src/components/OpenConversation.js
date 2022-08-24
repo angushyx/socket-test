@@ -30,7 +30,6 @@ export default function OpenConversation() {
         <div className="flex-grow-1 overflow-auto">
           <div className="h-100 d-felx flex-column align-items-start justify-content-end px-3">
             {selectedConversation.messages.map((message, index) => {
-              console.log(message.fromMe)
               const lastMessage =
                 selectedConversation.messages.length - 1 === index
               return (
@@ -44,7 +43,7 @@ export default function OpenConversation() {
                     className={`rounded px-2 py-1 ${
                       message.fromMe
                         ? 'bg-primary text-white align-self-end'
-                        : 'border'
+                        : 'align-self-start border'
                     }`}
                   >
                     {message.text}
