@@ -32,7 +32,6 @@ const io = new Server(server, {
 // !TEST 1
 // io.on('connection', (socket) => {
 //   //測試有沒有連線成功
-//   const id = socket.handshake.query.id
 
 //   console.log(`User Connected:${socket.id}`)
 
@@ -51,9 +50,9 @@ const io = new Server(server, {
 //    * 前端的 emit 參數就也要寫一樣。
 //    */
 //   socket.on('send_message', (data) => {
-//     //  broadcast：全伺服器都會接受到
-//     // socket.broadcast.emit('receive_message', data)
-//     //  to：只有特定伺服器可以接收到，前面要鮮血條件，鏈式寫法
+//  broadcast：全伺服器都會接受到
+// socket.broadcast.emit('receive_message', data)
+//  to：只有特定伺服器可以接收到，前面要鮮血條件，鏈式寫法
 //     console.log('data.room', data.room)
 //     socket.to(data.room).emit('receive_message', data)
 //   })
@@ -62,15 +61,45 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   const id = socket.handshake.query.id
   socket.join(id)
-
+  console.log(id)
   socket.on('send-message', ({ recipients, text }) => {
     recipients.forEach((recipient) => {
       console.log(recipients)
       const newRecipients = recipients.filter((r) => r !== recipient)
       newRecipients.push(id)
-      socket.broadcast.to(recipient).emit('receive-message', { recipients: newRecipients, sender: id, text })
+      socket.broadcast.emit('receive-message', { recipients: newRecipients, sender: id, text })
     })
   })
 })
+
+/**
+ * TODO: 建立 SOCKET ROOM
+ * 1. 創建 6 個 room
+ * 2. 使用者可以隨意進出 room
+ * 3. 使用者在該 room 裡面發布的內容都是 broadcast
+ * APIs ： join('room_id')、leave('room_id')
+ * !發送給同一個 room 的寫法：socket.broadcast.in('room').emit
+ *
+ *
+ */
+
+/**
+ * ! 發送訊息使用 emit
+ * 在 emit 前可以設定要發送的目標，和發送的方式
+ * 發送方式
+ * * 廣播 broadcast
+ * *
+ * 在哪裡發送
+ * * in 後面加上目標位置 ex：socket.broadcast.in(socket['room'])
+ *
+ * 1. on('setnickName)  //設定暱稱
+ * 2. on('join')        //加入聊天室
+ * 3. on('leave')       //離開聊天室
+ * 4. on('post')        //在指定聊天室發布訊息(兩種狀況)
+ *     (1) 沒有選擇 room 的狀態下發送訊息--> emit 一條錯誤訊息回前端
+ *     (2) 發送訊息到指定的 room socket.broadcast.in(socket['room'])
+ * 5. on('disconnect')
+ *     (1)判斷是否在 room 裡面， 發送離開聊天室的 emit 到聊天室。
+ */
 
 server.listen(PORT, console.log(`Server has successfully Start at: ${PORT}`))
